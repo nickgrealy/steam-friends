@@ -1,0 +1,16 @@
+{
+    "name": "steam-friends",
+    "description": "Shows common games between all your friends.",
+    "version": "1.0.0",
+    "private": true,
+    "author": "nickgrealy@gmail.com",
+    "engines": {
+        "node": "=7.10.0"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "express": "4.15.3",
+        "request": "2.81.0",
+        "request-promise": "^4.2.1"
+    }
+}
