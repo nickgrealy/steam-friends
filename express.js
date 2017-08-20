@@ -88,14 +88,14 @@ app.route('/api/friends/:steamId')
                     res.write('<table border=1 cellspacing=1 cellpadding=4>');
 
                     // logos
-                    res.write('<tr><th></th><th>')
+                    res.write('<tr><th></th><th></th><th>')
                     res.write(ids.map(function(id) {
                         return '<img src="' + friendsBySteamId[id].avatarmedium + '"></img>'
                     }).join('</th><th>'));
                     res.write('</th></tr>');
 
                     // names
-                    res.write('<tr><th>(Game Name)</th><th>')
+                    res.write('<tr><th></th><th>(Game Name)</th><th>')
                     res.write(ids.map(function(id) {
                         return '<a href="' + friendsBySteamId[id].profileurl + '">' + friendsBySteamId[id].personaname + '</a>';
                     }).join('</th><th>'));
@@ -105,7 +105,10 @@ app.route('/api/friends/:steamId')
                     Object.keys(gamesByAppId).forEach(function(appid) {
                         var game = gamesByAppId[appid];
                         var owners = gameOwnersByAppId[appid];
-                        res.write('<tr><th><img title="' + game.name + '" src="http://media.steampowered.com/steamcommunity/public/images/apps/' + appid + '/' + game.img_logo_url + '.jpg"></img></th><th>');
+                        res.write('<tr>')
+                        res.write('<th><img title="' + game.name + '" src="http://media.steampowered.com/steamcommunity/public/images/apps/' + appid + '/' + game.img_logo_url + '.jpg"></img></th>');
+                        res.write('<th>' + game.name + '</th>');
+                        res.write('<th>');
                         // and whether the user is an owner...
                         res.write(ids.map(function(id) {
                             return owners.indexOf(id) !== -1 ? 'TRUE' : '';
