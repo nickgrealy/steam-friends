@@ -3,6 +3,7 @@ var request = require('request-promise');
 var functions = require('firebase-functions')
 var app = express()
 
+// firebase functions:config:set steam.apikey="$YOUR_STEAM_API_KEY"
 var STEAM_KEY = functions.config().steam.apikey
 
 if (typeof STEAM_KEY === 'undefined' || STEAM_KEY === null || STEAM_KEY.length === 0) {
