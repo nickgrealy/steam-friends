@@ -1,9 +1,9 @@
 var express = require('express');
-var http = require('http');
 var request = require('request-promise');
+var functions = require('firebase-functions')
+var app = express()
 
-var STEAM_KEY = process.env.STEAM_API_KEY;
-var LOCAL_SERVER_PORT = 3000;
+var STEAM_KEY = functions.config().steam.apikey
 
 if (typeof STEAM_KEY === 'undefined' || STEAM_KEY === null || STEAM_KEY.length === 0) {
     return console.log("\nPlease pass the STEAM_KEY as a parameter. If you need to get a key, please go to http://steamcommunity.com/dev/apikey\n" +
@@ -40,8 +40,6 @@ API.sendError = function(res) {
 
 /* ---- Routes ---- */
 
-var app = express()
-
 app.route('/')
     .get((req, res) => {
         res.type('text/html')
@@ -49,8 +47,8 @@ app.route('/')
         res.write('<b>Enter SteamId...</b><hr/>')
         res.write('<form action="/friends" method="get">')
         res.write('<label>SteamId:</label>')
-        res.write('<input name="steamid" type="text" autofocus/>')
-        res.write('<input type="submit" value="Next" />')
+        res.write('<input name="steamid" type="text" placeholder="Enter your SteamId..." autofocus/>')
+        res.write('<input type="submit" value="Next - choose friends" />')
         res.write('</form>')
         res.end()
     })
@@ -80,10 +78,11 @@ app.route('/friends')
                     res.write('</tr>')
                 })
                 res.write('</table>')
-                res.write('<input type="submit" value="Next" />')
+                res.write('<input type="submit" value="Next - see shared games" />')
                 res.write('</form>')
                 res.end()
-            })
+            },
+            error => res.status(400).send(error))
         })
     })
     
@@ -159,11 +158,7 @@ app.route('/friends/games')
             res.end('</table>');
 
         },
-        function(error) {
-            res.status(400).send(error);
-        })
+        error => res.status(400).send(error))
     })
 
-http.createServer(app).listen(LOCAL_SERVER_PORT);
-
-console.log('Server started - http://127.0.0.1:' + LOCAL_SERVER_PORT + '/');
+module.exports = { app }
