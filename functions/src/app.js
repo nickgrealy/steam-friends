@@ -49,20 +49,39 @@ API.sendError = function(res) {
 
 /* ---- Routes ---- */
 
+const addHeaders = res => {
+    res.type('text/html')
+    res.status(200)
+    res.write('<!doctype html><html lang="en"><head>')
+    res.write('<meta charset="utf-8">')
+    res.write('<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">')
+    res.write('<meta name="description" content="">')
+    res.write('<style>')
+    res.write('table{border-collapse:collapse;}')
+    res.write('thead,th,td{border:2px solid grey;padding:6px;}')
+    res.write('thead,thead *{position: -webkit-sticky;position: -moz-sticky;position: -ms-sticky;position: -o-sticky;position:sticky;top:-1px;z-index:10;background:lightblue;}')
+    res.write('input[type=submit]{border:2px solid blue;box-shadow:5px 5px 5px grey;font-size:1em;padding:0.5em 1em;border-radius:2em;}')
+    res.write('</style>')
+    res.write('</head><body>')
+}
+const addFooter = res => {
+    res.write('</body></html>')
+    res.end()
+}
+
 app.route('/')
     .get((req, res) => {
-        res.type('text/html')
-        res.status(200)
-        res.write('<b>Enter Steam login name...</b><hr/>')
-        res.write('<p><b style="color:red">N.B. Your <a href="https://steamcommunity.com/my/edit/settings">steam profile</a> must be set to "public".</b></p>')
+        addHeaders(res)
+        res.write('<b>Enter Steam login name/custom url...</b><hr/>')
+        res.write('<p><b style="color:red">N.B. Ensure your <a href="https://steamcommunity.com/my/edit/settings">steam profile</a> visibility is "public", and you have a "Custom URL" setup.</b></p>')
         res.write('<p>')
         res.write('<form action="/friends" method="get">')
-        res.write('<label>Steam login name:</label>&nbsp;')
-        res.write('<input name="username" type="text" size="40" placeholder="Enter your Steam login name..." autofocus/>')
+        res.write('<label>Steam login name/custom url:</label>&nbsp;')
+        res.write('<input name="username" type="text" size="40" placeholder="Enter your Steam login name/custom url..." autofocus/>')
         res.write('</p>')
         res.write('<p><input type="submit" value="Next - choose friends" /></p>')
         res.write('</form>')
-        res.end()
+        addFooter(res)
     })
 
 app.route('/friends')
@@ -80,24 +99,25 @@ app.route('/friends')
                     Promise.all(promises).then(responses => {
                         var friends = responses[0].response.players
                         friends = friends.sort((a, b) => a.personaname.localeCompare(b.personaname))
-                        res.type('text/html')
-                        res.status(200)
+                        addHeaders(res)
                         res.write('<b>Choose friends to search...</b><hr/>')
                         res.write('<form action="/friends/games" method="get">')
                         res.write('<p>')
-                        res.write('<table border=1 cellspacing=1 cellpadding=4>')
-                        res.write('<tr><th>' + 'Select,Avatar,SteamId,Nickname,Realname,ProfileUrl (Username)'.split(',').join('</th><th>') + '</th></tr>')
+                        res.write('<table>')
+                        res.write('<thead><tr><th>' + 'Select,Avatar,SteamId,Nickname,Realname,ProfileUrl (Username)'.split(',').join('</th><th>') + '</th></tr></thead>')
+                        res.write('<tbody>')
                         friends.forEach(f => {
                             res.write('<tr>')
                             res.write('<td><input type="checkbox" name="friendIds" value="' + f.steamid + '" ' + (f.steamid == mySteamId ? 'checked' : '') + '/>')
                             res.write('<td>' + ['<img src="' + f.avatarmedium + '"/>', f.steamid, f.personaname, f.realname, '<a href="' + f.profileurl + '">' + f.profileurl + '</a>'].join('</td><td>') + '</td>')
                             res.write('</tr>')
                         })
+                        res.write('</tbody>')
                         res.write('</table>')
                         res.write('</p>')
                         res.write('<p><input type="submit" value="Next - see shared games" /></p>')
                         res.write('</form>')
-                        res.end()
+                        addFooter(res)
                     },
                     error => res.status(400).send(error))
                 })
@@ -144,10 +164,11 @@ app.route('/friends/games')
                 }
             }
 
-            res.type('text/html')
-            res.status(200)
+            addHeaders(res)
+
             res.write('<b>Shared games (unsorted)...</b><hr/>')
-            res.write('<table border=1 cellspacing=1 cellpadding=4>');
+            res.write('<table>')
+            res.write('<thead>')
 
             // avatars
             res.write('<tr><th></th><th></th><th>Avatar:</th><th>')
@@ -164,6 +185,8 @@ app.route('/friends/games')
             res.write(friends.map(f => '<a href="' + f.profileurl + '">' + f.realname + '</a>').join('</th><th>'))
             res.write('</th></tr>');
 
+            res.write('</thead><tbody>')
+
             // games
             Object.keys(gamesByAppId).forEach(function(appid) {
                 var game = gamesByAppId[appid];
@@ -177,7 +200,9 @@ app.route('/friends/games')
                 res.write(friendIds.map(id => owners.indexOf(id) !== -1 ? 'TRUE' : '').join('</th><th>'));
                 res.write('</th></tr>');
             });
-            res.end('</table>');
+            res.write('</tbody></table>');
+
+            addFooter(res)
 
         },
         error => res.status(400).send(error))

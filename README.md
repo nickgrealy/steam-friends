@@ -20,5 +20,6 @@ Then simply navigate to the following url (based on your Steam Id):
 
 ## Todo
 
+- Make mobile responsive
 - Multiplayer only
 - Sort games by occurences
